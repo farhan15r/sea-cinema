@@ -1,4 +1,3 @@
-import database from "@/db/mongo";
 import MoviesService from "@/lib/service/mongo/MoviesService";
 import { NextResponse } from "next/server";
 
@@ -10,6 +9,6 @@ export async function GET() {
 
     return NextResponse.json(movies);
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: error.status  });
+    return NextResponse.json({ message: error.message }, { status: error.status  });s
   }
 }

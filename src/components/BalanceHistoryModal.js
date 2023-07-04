@@ -22,10 +22,10 @@ function BalanceHistoryModal({ isOpen, onClose }) {
             Authorization: `Bearer ${accessToken}`,
           },
         };
-        const responseBalance = await axios.get("api/balance", config);
+        const responseBalance = await axios.get("/api/balance", config);
         const { balance } = responseBalance.data;
 
-        const responseHistory = await axios.get("api/balance/history", config);
+        const responseHistory = await axios.get("/api/balance/history", config);
 
         const { histories } = responseHistory.data;
 

@@ -20,7 +20,7 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
             Authorization: `Bearer ${accessToken}`,
           },
         };
-        const response = await axios.get("api/balance", config);
+        const response = await axios.get("/api/balance", config);
         const { balance } = response.data;
 
         setCurrentBalance(balance);
@@ -47,7 +47,7 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
     };
 
     const response = await axios.put(
-      "api/balance",
+      "/api/balance",
       {
         amount: topUpAmount,
         type: "topup",
@@ -76,7 +76,7 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
     };
 
     const response = await axios.put(
-      "api/balance",
+      "/api/balance",
       {
         amount: withdrawAmount,
         type: "withdraw",

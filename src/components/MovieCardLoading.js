@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function MovieCardLoading({ movie }) {
+export default function MovieCardLoading() {
   return (
     <>
       <div className="card bg-base-100 shadow-md shadow-slate-400 animate-pulse">
