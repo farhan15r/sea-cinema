@@ -3,16 +3,16 @@ import AuthenticationError from "../exceptions/AuthenticationError";
 
 const TokenManager = {
   generateAccessToken: (payload) => {
-    return jwt.sign(payload, "asdasdasdasdasdasdasdasdasdasd", { expiresIn: "15d" });
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: process.env.ACCESS_TOKEN_AGE });
   },
 
   generateRefreshToken: (payload) => {
-    return jwt.sign(payload, "asdasdasdasdasdasdasdasdasdasd", { expiresIn: "7d" });
+    return jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: process.env.REFRESH_TOKEN_AGE });
   },
 
   verifyAccessToken: (token) => {
     try {
-      return jwt.verify(token, "asdasdasdasdasdasdasdasdasdasd");
+      return jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
     } catch (error) {
       throw new AuthenticationError("Invalid access token");
     }

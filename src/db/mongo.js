@@ -1,11 +1,11 @@
 import { MongoClient } from "mongodb";
 
-const uri = "mongodb+srv://admin:admin@clusterseacinema.yywxlp7.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
 client.connect();
 
-const dbName = "sea-cinema";
+const dbName = process.env.MONGO_DB_NAME;
 
 const database = client.db(dbName);
 
