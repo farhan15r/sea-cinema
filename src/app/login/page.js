@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation'
+import tokenUtils from "../utils/tokenUtils";
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -13,10 +14,8 @@ export default function Home() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      redirect("/");
-    }
+    if (tokenUtils.isLogin()) redirect("/");
+  
     setRender(true);
   }, []);
 

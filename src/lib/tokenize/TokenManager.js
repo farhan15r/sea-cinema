@@ -10,6 +10,14 @@ const TokenManager = {
     return jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: process.env.REFRESH_TOKEN_AGE });
   },
 
+  verifyRefreshToken: (token) => {
+    try {
+      return jwt.verify(token, process.env.REFRESH_TOKEN_KEY);
+    } catch (error) {
+      throw new AuthenticationError("Invalid refresh token");
+    }
+  },
+
   verifyAccessToken: (token) => {
     try {
       return jwt.verify(token, process.env.ACCESS_TOKEN_KEY);

@@ -1,38 +1,113 @@
 "use client";
 
+import axiosJWT from "@/app/utils/axiosJWT";
+import tokenUtils from "@/app/utils/tokenUtils";
 import axios from "axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function Home({ params }) {
+  const [isLogin, setIsLogin] = useState(false);
   const [movie, setMovie] = useState({});
   const { movieId } = params;
+  const [showTime, setShowTime] = useState(false);
   const [seats, setSeats] = useState([]);
+  const [dates, setDates] = useState([]);
+  const [times, setTimes] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const resultMovie = await axios.get(`/api/movies/${movieId}`);
-        const movie = resultMovie.data;
-        movie.ticketPriceStr = `Rp${movie.ticket_price.toLocaleString(
-          "id-ID"
-        )}`;
-        setMovie(movie);
+    setIsLogin(tokenUtils.isLogin());
+    fetchMovieData();
+    fetchDatesData();
+  }, [movieId]);
 
-        const resultSeats = await axios.get(
-          `/api/seats/${movieId}/05-07-2023/09:00`
-        );
-        const seats = resultSeats.data;
+  useEffect(() => {
+    if (selectedDate) {
+      fetchTimesData();
+    }
+  }, [selectedDate]);
 
-        setSeats(seats);
-      } catch (error) {
-        // Handle error
-      }
+  useEffect(() => {
+    if (selectedTime) {
+      fetchSeatsData();
+    }
+  }, [selectedTime]);
+
+  const handleDateChange = (event) => {
+    setSelectedDate(event.target.value);
+  };
+
+  const handleTimeChange = (event) => {
+    setSelectedTime(event.target.value);
+  };
+
+  const handleBookTicket = async () => {
+    const data = {
+      movieId,
+      date: selectedDate,
+      time: selectedTime,
+      seats: selectedSeats,
+    };
+
+    try {
+      const response = await axiosJWT.post("/api/bookings", data);
+    }catch (error) {
+      // setStatus("error");
+      // setMessage(error.response.data.message);
+      // window.statusModal.showModal();
     }
 
-    fetchData();
-  }, [movieId]);
+    setStatus("error");
+    setMessage("Booking ticket success!");
+    window.statusModal.showModal();
+  };
+
+  const fetchMovieData = async () => {
+    try {
+      const resultMovie = await axios.get(`/api/movies/${movieId}`);
+      const movie = resultMovie.data;
+      movie.ticketPriceStr = `Rp${movie.ticket_price.toLocaleString("id-ID")}`;
+      setMovie(movie);
+    } catch (error) {}
+  };
+
+  const fetchDatesData = async () => {
+    try {
+      const resultDates = await axios.get(`/api/show-times/${movieId}`);
+      const dates = resultDates.data;
+      setDates(dates);
+      setSelectedDate(dates[0]);
+    } catch (error) {}
+  };
+
+  const fetchTimesData = async () => {
+    try {
+      const resultTimes = await axios.get(
+        `/api/show-times/${movieId}/${selectedDate}`
+      );
+      const times = resultTimes.data;
+      setTimes(times);
+      setSelectedTime(times[0]);
+    } catch (error) {}
+  };
+
+  const fetchSeatsData = async () => {
+    try {
+      const resultSeats = await axios.get(
+        `/api/seats/${movieId}/${selectedDate}/${selectedTime}`
+      );
+      const seats = resultSeats.data;
+
+      setSeats(seats);
+      setSelectedSeats([]);
+      setShowTime(true);
+    } catch (error) {}
+  };
 
   function handleSeatClick(seatNumber) {
     // Toggle seat selection
@@ -49,6 +124,17 @@ export default function Home({ params }) {
 
   return (
     <main className="container my-10 max-w-3xl">
+      <dialog id="statusModal" className="modal" onClick={() => window.location.reload()}>
+        <form method="dialog" className={`modal-box border-2 border-${status}`}>
+          <h3 className="font-bold text-lg">{status}!</h3>
+          <p className="py-4">{message}</p>
+          <div className="modal-action">
+            <button className="btn" onClick={() => window.location.reload()}>
+              Close
+            </button>
+          </div>
+        </form>
+      </dialog>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="card bg-base-100 shadow-md shadow-slate-400 overflow-hidden">
           <figure className="relative">
@@ -75,35 +161,134 @@ export default function Home({ params }) {
             </span>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-bold mt-8 mb-4">Select Your Seat</h3>
-          <div className="text-center">
-            <span className="col-span-1">Screen</span>
-            <div className="grid grid-cols-8 gap-2">
-              {seats.map((seat) => (
-                <div
-                  key={seat.number}
-                  className={`py-2 ${
-                    selectedSeats.includes(seat.number)
-                      ? "bg-accent text-white rounded-md cursor-pointer"
-                      : seat.isBooked
-                      ? "bg-red-500 text-white rounded-md disabled"
-                      : "bg-base-200 border-accent border-2 rounded-md cursor-pointer"
-                  }`}
-                  onClick={
-                    !seat.isBooked
-                      ? () => handleSeatClick(seat.number)
-                      : undefined
-                  }
-                >
-                  {seat.number}
-                </div>
-              ))}
+      {showTime ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xl font-bold mt-8 mb-4">Select Your Seat</h3>
+            <div className="text-center">
+              <div className="border-base-300 bg-base-200 rounded-md border-2 m-2">
+                <span className="col-span-1">Screen</span>
+              </div>
+              <div className="grid grid-cols-8 gap-2">
+                {seats &&
+                  seats.map((seat) => (
+                    <div
+                      key={seat.number}
+                      className={`py-2 ${
+                        selectedSeats.includes(seat.number)
+                          ? "bg-accent text-white rounded-md cursor-pointer"
+                          : seat.isBooked
+                          ? "bg-red-500 text-white rounded-md disabled"
+                          : "bg-base-200 border-accent border-2 rounded-md cursor-pointer"
+                      }`}
+                      onClick={
+                        !seat.isBooked
+                          ? () => handleSeatClick(seat.number)
+                          : undefined
+                      }
+                    >
+                      {seat.number}
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
+          <div className="flex flex-col mt-8 gap-4 justify-between">
+            <div>
+              <h3 className="text-xl font-bold">Select Date & Time</h3>
+              <div>
+                <div>
+                  <label htmlFor="date" className="label">
+                    Date:
+                  </label>
+                  <select
+                    id="date"
+                    className="select select-accent w-full max-w-xs"
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                  >
+                    {dates &&
+                      dates.map((date) => (
+                        <option key={date} value={date}>
+                          {date}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="time" className="label">
+                    Time:
+                  </label>
+                  <select
+                    id="time"
+                    className="select select-accent w-full max-w-xs"
+                    value={selectedTime}
+                    onChange={handleTimeChange}
+                  >
+                    {times &&
+                      times.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {isLogin ? (
+              <div>
+                <h3 className="text-xl font-bold">Book Your Ticket</h3>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <span className="text-base">Ticket Price</span>
+                    <span className="text-base">{movie.ticketPriceStr}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-base">Seat(s)</span>
+                    <span className="text-base">
+                      {selectedSeats.length > 0
+                        ? selectedSeats.join(", ")
+                        : "No seat selected"}
+                    </span>
+
+                    <span className="text-base">{selectedSeats.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-base">Total</span>
+                    <span className="text-base">
+                      {selectedSeats.length > 0
+                        ? `Rp${(
+                            selectedSeats.length * movie.ticket_price
+                          ).toLocaleString()}`
+                        : "Rp0"}
+                    </span>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      className="btn btn-accent"
+                      onClick={handleBookTicket}
+                      disabled={selectedSeats.length === 0}
+                    >
+                      Book Ticket
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <h4 className="text-xl font-bold text-center mt-5">
+                Please login to book ticket
+              </h4>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <h3 className="text-xl font-bold text-center mt-5">
+          We are sorry, there is no show time available
+        </h3>
+      )}
     </main>
   );
 }

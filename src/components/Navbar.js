@@ -6,26 +6,18 @@ import { useEffect, useState } from "react";
 import { BiMoney } from "react-icons/bi";
 import BalanceModal from "./BalanceModal";
 import BalanceHistoryModal from "./BalanceHistoryModal";
-
-function decodeToken(token) {
-  // decode jwt token
-  const base64 = token.split(".")[1];
-  const decodedValue = JSON.parse(window.atob(base64));
-
-  return decodedValue;
-}
+import tokenUtils from "@/app/utils/tokenUtils";
 
 export default function Navbar() {
   const [isLogin, setIsLogin] = useState(false);
-  const [user, setUser] = useState({});
+  const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
+    if (tokenUtils.isLogin()) {
       setIsLogin(true);
-      setUser(decodeToken(accessToken));
+      setUsername(tokenUtils.getUsername());
     }
   }, []);
 
@@ -33,7 +25,7 @@ export default function Navbar() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setIsLogin(false);
-    setUser({});
+    setUsername("");
   }
 
   return (
@@ -48,7 +40,7 @@ export default function Navbar() {
           {isLogin ? (
             <>
               <span className="text-sm font-bold text-base-content mr-3">
-                {user.username}
+                {username}
               </span>
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
@@ -66,12 +58,6 @@ export default function Navbar() {
                   className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
                 >
                   <li>
-                    <a className="justify-between">
-                      Profile
-                      <span className="badge">New</span>
-                    </a>
-                  </li>
-                  <li>
                     <a
                       className="justify-between"
                       onClick={() => setIsModalOpen(true)}
@@ -81,9 +67,6 @@ export default function Navbar() {
                         <BiMoney />
                       </span>
                     </a>
-                  </li>
-                  <li>
-                    <a>Settings</a>
                   </li>
                   <li>
                     <a onClick={logoutAction}>Logout</a>

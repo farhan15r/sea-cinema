@@ -1,5 +1,6 @@
 "use client";
 
+import axiosJWT from "@/app/utils/axiosJWT";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -11,84 +12,52 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
       return null;
     }
 
-    const fetchData = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        };
-        const response = await axios.get("/api/balance", config);
-        const { balance } = response.data;
-
-        setCurrentBalance(balance);
-      } catch (error) {
-      }
-    };
-
-    if (isOpen) {
-      fetchData();
-    }
+    fetchData();
   }, [isOpen]);
 
-  async function topUpAction(e) {
+  const fetchData = async () => {
+    try {
+      const response = await axiosJWT.get("/api/balance");
+      const { balance } = response.data;
+
+      setCurrentBalance(balance);
+    } catch (error) {}
+  };
+
+  const updateBalance = async (data) => {
+    try {
+      const response = await axiosJWT.put("/api/balance", data);
+      const { balance } = response.data;
+
+      setCurrentBalance(balance);
+    } catch (error) {}
+  };
+
+  const topUpAction = async (e) => {
     e.preventDefault();
     const topUpAmount = parseInt(document.getElementById("topup-amount").value);
     const topUpMethod = document.getElementById("topup-method").value;
 
-    const accessToken = localStorage.getItem("accessToken");
+    updateBalance({
+      amount: topUpAmount,
+      type: "topup",
+      method: topUpMethod,
+    });
+  };
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-
-    const response = await axios.put(
-      "/api/balance",
-      {
-        amount: topUpAmount,
-        type: "topup",
-        method: topUpMethod,
-      },
-      config
-    );
-
-    const newBalance = response.data.balance;
-    setCurrentBalance(newBalance);
-  }
-
-  async function withdrawAction(e) {
+  const withdrawAction = async (e) => {
     e.preventDefault();
     const withdrawAmount = parseInt(
       document.getElementById("withdraw-amount").value
     );
     const withdrawMethod = document.getElementById("withdraw-method").value;
 
-    const accessToken = localStorage.getItem("accessToken");
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
-
-    const response = await axios.put(
-      "/api/balance",
-      {
-        amount: withdrawAmount,
-        type: "withdraw",
-        method: withdrawMethod,
-      },
-      config
-    );
-
-    const newBalance = response.data.balance; 
-
-    setCurrentBalance(newBalance);
-  }
+    updateBalance({
+      amount: withdrawAmount,
+      type: "withdraw",
+      method: withdrawMethod,
+    });
+  };
 
   return (
     <dialog id="balance-modal" className="modal" onClick={() => onClose()} open>
@@ -100,7 +69,9 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
 
         <div className="collapse collapse-arrow bg-base-200 mb-2">
           <input type="radio" name="my-accordion-2" checked="checked" />
-          <div className="collapse-title text-xl font-medium min-w-0">Top Up</div>
+          <div className="collapse-title text-xl font-medium min-w-0">
+            Top Up
+          </div>
           <div className="collapse-content min-w-0">
             <form onSubmit={topUpAction}>
               <div className="form-control">
@@ -138,7 +109,9 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
         </div>
         <div className="collapse collapse-arrow bg-base-200 mb-2">
           <input type="radio" name="my-accordion-2" />
-          <div className="collapse-title text-xl font-medium min-w-0">Withdraw</div>
+          <div className="collapse-title text-xl font-medium min-w-0">
+            Withdraw
+          </div>
           <div className="collapse-content min-w-0">
             <form onSubmit={withdrawAction}>
               <div className="form-control">

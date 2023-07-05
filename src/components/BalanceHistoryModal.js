@@ -3,6 +3,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import RowBalanceHistory from "./RowBalanceHistory";
+import axiosJWT from "@/app/utils/axiosJWT";
 
 function BalanceHistoryModal({ isOpen, onClose }) {
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -13,31 +14,21 @@ function BalanceHistoryModal({ isOpen, onClose }) {
       return null;
     }
 
-    const fetchData = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        };
-        const responseBalance = await axios.get("/api/balance", config);
-        const { balance } = responseBalance.data;
-
-        const responseHistory = await axios.get("/api/balance/history", config);
-
-        const { histories } = responseHistory.data;
-
-        setCurrentBalance(balance);
-        setHistories(histories);
-      } catch (error) {}
-    };
-
-    if (isOpen) {
-      fetchData();
-    }
+    fetchData();
   }, [isOpen]);
+
+  const fetchData = async () => {
+    try {
+      const responseBalance = await axiosJWT.get("/api/balance");
+      const responseHistory = await axiosJWT.get("/api/balance/history");
+      
+      const { balance } = responseBalance.data;
+      const { histories } = responseHistory.data;
+
+      setCurrentBalance(balance);
+      setHistories(histories);
+    } catch (error) {}
+  };
 
   return (
     <dialog id="balance-modal" className="modal" onClick={() => onClose()} open>
@@ -50,11 +41,9 @@ function BalanceHistoryModal({ isOpen, onClose }) {
         <div className="table-container max-h-[50vh] overflow-auto mb-3">
           <table className="table">
             <tbody>
-              {
-                histories.map((history, i) => (
-                  <RowBalanceHistory history={history} key={i} />
-                ))
-              }
+              {histories.map((history, i) => (
+                <RowBalanceHistory history={history} key={i} />
+              ))}
             </tbody>
           </table>
         </div>
