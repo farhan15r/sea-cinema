@@ -127,7 +127,7 @@ export default function Home({ params }) {
   return (
     <main className="container my-10 max-w-3xl">
       <dialog id="statusModal" className="modal" onClick={() => window.location.reload()}>
-        <form method="dialog" className={`modal-box border-2 border-${status == 'success' ? status : 'error' }`}>
+        <form method="dialog" className={`modal-box border-2 ${status == 'success' ? 'border-success' : 'border-error' }`}>
           <h3 className="font-bold text-lg">{status}!</h3>
           <p className="py-4">{message}</p>
           <div className="modal-action">
