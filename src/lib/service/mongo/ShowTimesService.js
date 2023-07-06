@@ -41,7 +41,7 @@ export default class ShowTimesService {
     return times;
   }
 
-  async getEpxDate({ movieId, date, time }) {
+  async getExpDate({ movieId, date, time }) {
     const showTime = await this.showTimesCollection.findOne({
       movieId,
       date,

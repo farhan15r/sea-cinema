@@ -14,8 +14,13 @@ export async function POST(request) {
     const user = await userService.getUser(username);
     await userService.validateCredentials(password, user.password);
 
-    const accessToken = TokenManager.generateAccessToken({ username });
-    const refreshToken = TokenManager.generateRefreshToken({ username });
+    const payload = {
+      username: user.username,
+      age: user.age,
+    };
+
+    const accessToken = TokenManager.generateAccessToken(payload);
+    const refreshToken = TokenManager.generateRefreshToken(payload);
 
     return NextResponse.json(
       {
@@ -37,8 +42,8 @@ export async function PUT(request) {
   const { refreshToken } = req;
 
   try {
-    const { username } = TokenManager.verifyRefreshToken(refreshToken);
-    const accessToken = TokenManager.generateAccessToken({ username });
+    const {username, age} = TokenManager.verifyRefreshToken(refreshToken);
+    const accessToken = TokenManager.generateAccessToken({username, age});
 
     return NextResponse.json(
       {

@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const { default: tokenUtils } = require("./tokenUtils");
+import tokenUtils from "./tokenUtils";
 
 const axiosJWT = axios.create();
 

@@ -36,16 +36,4 @@ export default class MoviesService {
 
     return movie.ticket_price;
   }
-
-  async getMovieTitle(movieId) {
-    const movie = await this.moviesCollection.findOne({
-      _id: new ObjectId(movieId),
-    });
-
-    if (!movie) {
-      throw new NotFoundError("Movie not found");
-    }
-
-    return movie.title;
-  }
 }

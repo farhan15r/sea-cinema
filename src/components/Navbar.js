@@ -4,15 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BiMoney } from "react-icons/bi";
+import { BsBoxArrowRight, BsTicketPerforated } from "react-icons/bs";
 import BalanceModal from "./BalanceModal";
 import BalanceHistoryModal from "./BalanceHistoryModal";
 import tokenUtils from "@/app/utils/tokenUtils";
+import MyTicketModal from "./MyTicketModal";
 
 export default function Navbar() {
   const [isLogin, setIsLogin] = useState(false);
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
 
   useEffect(() => {
     if (tokenUtils.isLogin()) {
@@ -69,7 +72,22 @@ export default function Navbar() {
                     </a>
                   </li>
                   <li>
-                    <a onClick={logoutAction}>Logout</a>
+                    <a
+                      className="justify-between"
+                      onClick={() => setIsTicketModalOpen(true)}
+                    >
+                      My Ticket
+                      <span className="badge">
+                        <BsTicketPerforated />
+                      </span>
+                    </a>
+                  </li>
+                  <li>
+                    <a onClick={logoutAction}>Logout
+                    <span className="badge">
+                        <BsBoxArrowRight />
+                      </span>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -89,6 +107,14 @@ export default function Navbar() {
                   onClose={() => setIsHistoryModalOpen(false)}
                 />
               )}
+              {
+                isTicketModalOpen && (
+                  <MyTicketModal
+                    isOpen={isTicketModalOpen}
+                    onClose={() => setIsTicketModalOpen(false)}
+                  />
+                )
+              }
             </>
           ) : (
             <Link href={"/login"} className="btn btn-ghost">

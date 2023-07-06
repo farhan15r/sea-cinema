@@ -9,20 +9,22 @@ export default class BookingsService {
     this.showTimesCollection = database.collection("showTimes");
   }
 
-  async getUserBalance(username) {}
-
-  async getTicketPrice(movieId) {}
-
   async bookTicket({
     currBalance,
     totalCost,
     username,
     movieId,
     movieTitle,
-    epxDate,
+    expDate,
     seats,
     showTimeId,
+    ageRating,
+    userAge,
   }) {
+    if (userAge < ageRating) {
+      throw new ClientError("You are not old enough to watch this movie");
+    }
+
     if (currBalance < totalCost) {
       throw new ClientError("Insufficient balance");
     }
@@ -33,7 +35,7 @@ export default class BookingsService {
       movieTitle,
       seats,
       totalCost,
-      epxDate,
+      expDate,
       showTimeId,
     };
 
@@ -42,5 +44,17 @@ export default class BookingsService {
     if (!booking) {
       throw new ClientError("Failed to book ticket");
     }
+  }
+
+  async getBookingTickets(username) {
+    const currDate = new Date();
+
+    const bookingTickets = await this.bookingCollection.find({
+      username,
+      expDate: { $gte: currDate }
+    },
+    ).toArray();
+
+    return bookingTickets;
   }
 }

@@ -11,7 +11,7 @@ export async function POST(request) {
   const { headers } = request;
 
   const token = TokenManager.getTokenFromHeaders(headers);
-  const { username } = TokenManager.verifyAccessToken(token);
+  const { username, age } = TokenManager.verifyAccessToken(token);
 
   const usersService = new UsersService();
   const moviesService = new MoviesService();
@@ -21,8 +21,10 @@ export async function POST(request) {
   try {
     const currBalance = await usersService.getBalance(username);
     const ticketPrice = await moviesService.getTicketsPrice(movieId);
-    const movieTitle = await moviesService.getMovieTitle(movieId);
-    const epxDate = await showTimesService.getEpxDate({ movieId, date, time });
+    const { title: movieTitle, age_rating: ageRating } =
+      await moviesService.getMovieById(movieId);
+    // const movieTitle = await moviesService.getMovieTitle(movieId);
+    const expDate = await showTimesService.getExpDate({ movieId, date, time });
     const description = `${movieTitle} | ${date}-${time} | [${seats}]`;
     const showTimeId = await showTimesService.getShowTimeId({
       movieId,
@@ -36,9 +38,11 @@ export async function POST(request) {
       username,
       movieId,
       movieTitle,
-      epxDate,
+      expDate,
       seats,
       showTimeId,
+      ageRating,
+      userAge: age,
     });
     await usersService.updateBalanceBooking({
       username,
@@ -49,9 +53,39 @@ export async function POST(request) {
     });
     await showTimesService.updateSeats({ showTimeId, seats, isBooked: true });
 
-    return NextResponse.json({ message: "success booking ticket" }, { status: 200 });
+    return NextResponse.json(
+      { message: "success booking ticket" },
+      { status: 200 }
+    );
   } catch (error) {
     console.log(error);
-    return NextResponse.json({ message: error.message }, { status: error.status });
+    return NextResponse.json(
+      { message: error.message },
+      { status: error.status }
+    );
   }
+}
+
+export async function GET({headers}) {
+  const token = TokenManager.getTokenFromHeaders(headers);
+  const { username, age } = TokenManager.verifyAccessToken(token);
+
+  const bookingsService = new BookingsService();
+
+  try {
+    const bookingTickets = await bookingsService.getBookingTickets(username);
+
+    console.log();
+
+    return NextResponse.json(
+       bookingTickets,
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: error.message },
+      { status: error.status }
+    );
+  }
+
 }

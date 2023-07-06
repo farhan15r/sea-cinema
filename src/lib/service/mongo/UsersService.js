@@ -12,7 +12,9 @@ export default class UsersService {
   async checkUsernameAvailable(username) {
     const user = await this.userCollection.findOne({ username });
 
-    throw new ClientError("Username already taken");
+    if (user) throw new ClientError("Username already taken");
+
+    return;
   }
 
   async addUser({ username, age, password }) {
@@ -92,9 +94,6 @@ export default class UsersService {
         { $project: { _id: 0, histories: 1 } }, // Proyeksikan hanya field histories
       ])
       .toArray();
-
-    console.log("sortedHistories", sortedHistories);
-
     return sortedHistories[0].histories; // Mengembalikan array histories
   }
 

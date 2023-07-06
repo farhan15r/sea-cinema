@@ -56,15 +56,17 @@ export default function Home({ params }) {
 
     try {
       const response = await axiosJWT.post("/api/bookings", data);
+      const { message } = response.data;
+      setStatus("success");
+      setMessage(message);
     }catch (error) {
-      // setStatus("error");
-      // setMessage(error.response.data.message);
-      // window.statusModal.showModal();
-    }
+      const { message } = error.response.data;
+      setStatus("failed");
+      setMessage(message);
+    } finally {
 
-    setStatus("error");
-    setMessage("Booking ticket success!");
-    window.statusModal.showModal();
+      window.statusModal.showModal();
+    }
   };
 
   const fetchMovieData = async () => {
@@ -125,7 +127,7 @@ export default function Home({ params }) {
   return (
     <main className="container my-10 max-w-3xl">
       <dialog id="statusModal" className="modal" onClick={() => window.location.reload()}>
-        <form method="dialog" className={`modal-box border-2 border-${status}`}>
+        <form method="dialog" className={`modal-box border-2 border-${status == 'success' ? status : 'error' }`}>
           <h3 className="font-bold text-lg">{status}!</h3>
           <p className="py-4">{message}</p>
           <div className="modal-action">
