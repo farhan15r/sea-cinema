@@ -99,28 +99,28 @@ export default class ShowTimesService {
     }
   }
 
-  //   async dummy() {
-  //     const movieId = "64a35f0a6c97f98b6021397c";
-  //     const date = "2023-07-15";
-  //     const time = "15:00";
-  //     const expDate = new Date(`${date}T${time}:00.000Z`);
-  //     const seats = [];
-  //     for (let i = 1; i <= 64; i++) {
-  //       seats.push({
-  //         number: i,
-  //         isBooked: false,
-  //       });
-  //     }
+    async dummy() {
+      const movieId = "64a35f0a6c97f98b6021397c";
+      const date = "2023-07-15";
+      const time = "15:00";
+      const expDate = new Date(`${date}T${time}:00.000Z`);
+      const seats = [];
+      for (let i = 1; i <= 64; i++) {
+        seats.push({
+          number: i,
+          isBooked: false,
+        });
+      }
 
-  //     const showTime = {
-  //       movieId,
-  //       date,
-  //       time,
-  //       expDate,
-  //       seats,
-  //     };
-  // await this.showTimesCollection.insertOne(
-  //       showTime
-  //     );
-  //   }
+      const showTime = {
+        movieId,
+        date,
+        time,
+        expDate,
+        seats,
+      };
+  await this.showTimesCollection.insertOne(
+        showTime
+      );
+    }
 }
