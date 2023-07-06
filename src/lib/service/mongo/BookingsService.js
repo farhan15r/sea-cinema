@@ -1,5 +1,7 @@
 import database from "@/db/mongo";
 import ClientError from "@/lib/exceptions/ClientError";
+import NotFoundError from "@/lib/exceptions/NotFoundError";
+import { ObjectId } from "mongodb";
 
 export default class BookingsService {
   constructor() {
@@ -51,10 +53,39 @@ export default class BookingsService {
 
     const bookingTickets = await this.bookingCollection.find({
       username,
-      expDate: { $gte: currDate }
+      expDate: { $gte: currDate },
+      $or: [
+        { isWithdrawn: false },
+        { isWithdrawn: { $exists: false } }
+      ],
     },
     ).toArray();
 
     return bookingTickets;
+  }
+
+  async getBookingDetails(bookingId) {
+    const booking = await this.bookingCollection.findOne({
+      _id: new ObjectId(bookingId),
+    });
+
+    if (!booking) {
+      throw new NotFoundError("Booking not found");
+    }
+
+    return booking;
+  }
+
+  async withdrawBooking(bookingId) {
+    const result = await this.bookingCollection.updateOne(
+      { _id: new ObjectId(bookingId) },
+      { $set: { isWithdrawn: true } }
+    )
+
+    if (!result.acknowledged) {
+      throw new ClientError("Failed to withdraw booking");
+    }
+
+    return;
   }
 }

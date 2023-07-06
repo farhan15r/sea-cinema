@@ -21,7 +21,7 @@ function BalanceHistoryModal({ isOpen, onClose }) {
     try {
       const responseBalance = await axiosJWT.get("/api/balance");
       const responseHistory = await axiosJWT.get("/api/balance/history");
-      
+
       const { balance } = responseBalance.data;
       const { histories } = responseHistory.data;
 
@@ -35,7 +35,10 @@ function BalanceHistoryModal({ isOpen, onClose }) {
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <h3 className="font-bold text-lg">Balance History</h3>
         <p className="py-4">
-          Your balance is <span className="font-bold">{currentBalance}</span>
+          Your balance is{" "}
+          <span className="font-bold">
+            Rp{currentBalance.toLocaleString("id-ID")}
+          </span>
         </p>
 
         <div className="table-container max-h-[50vh] overflow-auto mb-3">

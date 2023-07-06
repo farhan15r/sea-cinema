@@ -9,7 +9,7 @@ export default function RowBalanceHistory({ history }) {
     if (type === "in") {
       return `+Rp${amountStr}`;
     } else if (type === "out") {
-      return `-${amountStr}`;
+      return `-Rp${amountStr}`;
     }
   }
 
@@ -32,7 +32,7 @@ export default function RowBalanceHistory({ history }) {
             </span>
           </div>
         </div>
-        <span className="badge badge-ghost badge-md">{description}</span>
+        <span className="badge badge-ghost badge-md h-fit">{description}</span>
       </td>
     </tr>
   );

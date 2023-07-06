@@ -36,7 +36,7 @@ export default function Navbar() {
       <div className="navbar container">
         <div className="flex-1">
           <Link href={"/"} className="btn btn-ghost normal-case text-xl">
-            daisyUI
+            SEA Cinema
           </Link>
         </div>
         <div className="flex-none">
