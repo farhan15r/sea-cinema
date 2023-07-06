@@ -123,6 +123,7 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
                   type="number"
                   defaultValue="10000"
                   min={10000}
+                  max={currentBalance < 500000 ? currentBalance : 500000}
                   className="input input-bordered"
                 />
               </div>

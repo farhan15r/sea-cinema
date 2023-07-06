@@ -17,10 +17,11 @@ export default class UsersService {
     return;
   }
 
-  async addUser({ username, age, password }) {
+  async addUser({fullName, username, age, password }) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.userCollection.insertOne({
+      fullName,
       username,
       age,
       password: hashedPassword,
