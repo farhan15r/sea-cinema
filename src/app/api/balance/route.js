@@ -37,9 +37,17 @@ export async function PUT(request) {
     const token = TokenManager.getTokenFromHeaders(headers);
     const { username } = TokenManager.verifyAccessToken(token);
 
-    const newBalance = await usersService.updateBalance(username, amount, type, method);
+    const newBalance = await usersService.updateBalance(
+      username,
+      amount,
+      type,
+      method
+    );
 
-    return NextResponse.json({ balance: newBalance }, { status: 200 });
+    return NextResponse.json(
+      { message: `Success ${type} ${amount}`, balance: newBalance },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
       { message: error.message },

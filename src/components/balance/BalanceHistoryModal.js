@@ -1,11 +1,12 @@
 "use client";
 
-import axios from "axios";
 import { useEffect, useState } from "react";
-import RowBalanceHistory from "./RowBalanceHistory";
+import RowBalanceHistory from "@/components/balance/RowBalanceHistory";
 import axiosJWT from "@/app/utils/axiosJWT";
+import LoadingDots from "@/components/LoadingDots";
 
 function BalanceHistoryModal({ isOpen, onClose }) {
+  const [historiesLoading, setHistoriesLoading] = useState(true);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [histories, setHistories] = useState([]);
 
@@ -27,6 +28,7 @@ function BalanceHistoryModal({ isOpen, onClose }) {
 
       setCurrentBalance(balance);
       setHistories(histories);
+      setHistoriesLoading(false);
     } catch (error) {}
   };
 
@@ -41,15 +43,21 @@ function BalanceHistoryModal({ isOpen, onClose }) {
           </span>
         </p>
 
-        <div className="table-container max-h-[50vh] overflow-auto mb-3">
-          <table className="table">
-            <tbody>
-              {histories.map((history, i) => (
-                <RowBalanceHistory history={history} key={i} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {historiesLoading ? (
+          <LoadingDots />
+        ) : !histories ? (
+          <p className="text-center">No history found</p>
+        ) : (
+          <div className="table-container max-h-[50vh] overflow-auto mb-3">
+            <table className="table">
+              <tbody>
+                {histories.map((history, i) => (
+                  <RowBalanceHistory history={history} key={i} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button className="btn btn-secondary" onClick={() => onClose()}>

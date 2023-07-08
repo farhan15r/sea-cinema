@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BiMoney } from "react-icons/bi";
 import { BsBoxArrowRight, BsTicketPerforated } from "react-icons/bs";
-import BalanceModal from "./BalanceModal";
-import BalanceHistoryModal from "./BalanceHistoryModal";
+import BalanceModal from "@/components/balance/BalanceModal";
+import BalanceHistoryModal from "@/components/balance/BalanceHistoryModal";
 import tokenUtils from "@/app/utils/tokenUtils";
-import MyTicketModal from "./MyTicketModal";
+import MyTicketModal from "@/components/ticket/MyTicketModal";
 
 export default function Navbar() {
   const [isLogin, setIsLogin] = useState(false);

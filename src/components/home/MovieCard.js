@@ -6,7 +6,10 @@ export default function MovieCard({ movie }) {
   }
 
   return (
-    <div className="card bg-base-100 shadow-md shadow-slate-400 hover:cursor-pointer" onClick={handleClick}>
+    <div
+      className="card bg-base-100 shadow-md shadow-slate-400 hover:cursor-pointer"
+      onClick={handleClick}
+    >
       <figure className="relative">
         <Image
           src={`${movie.poster_url}`}
@@ -22,7 +25,9 @@ export default function MovieCard({ movie }) {
       <div className="card-body p-4">
         <h2 className="card-title text-base md:text-lg">{movie.title}</h2>
         <div className="mt-auto w-full flex">
-          <span className="bg-accent rounded-xl text-black px-4 py-1 ml-auto">{movie.ticket_price_string}</span>
+          <span className="bg-accent rounded-xl text-black px-4 py-1 ml-auto">
+            Rp{movie.ticket_price.toLocaleString("id-ID")}
+          </span>
         </div>
       </div>
     </div>

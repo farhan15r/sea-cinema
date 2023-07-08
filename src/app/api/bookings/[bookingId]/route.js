@@ -33,7 +33,7 @@ export async function PUT(request, { params }) {
       isBooked: false,
     });
 
-    return NextResponse.json({ message: "success" }, { status: 200 });
+    return NextResponse.json({ message: "Success withdraw ticket" }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { message: error.message },

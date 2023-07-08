@@ -3,19 +3,22 @@
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 import tokenUtils from "../utils/tokenUtils";
+import ButtonAccent from "@/components/ButtonAccent";
+import Toast from "@/components/Toast";
 
 export default function Home() {
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [render, setRender] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [render, setRender] = useState(false);
 
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (tokenUtils.isLogin()) redirect("/");
-  
     setRender(true);
   }, []);
 
@@ -29,6 +32,7 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginLoading(true);
 
     const data = {
       username,
@@ -47,7 +51,11 @@ export default function Home() {
         window.location.href = "/";
       }
     } catch (error) {
-      setError(error.response.data.message);
+      setToast({
+        type: "error",
+        message: error.response.data.message,
+      });
+      setLoginLoading(false);
     }
   };
 
@@ -61,24 +69,6 @@ export default function Home() {
               className="mx-auto form-control max-w-md gap-4"
               onSubmit={handleSubmit}
             >
-              {error && (
-                <div className="alert alert-error">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>{error}</span>
-                </div>
-              )}
               <div>
                 <label className="label">
                   <span className="label-text">Username</span>
@@ -103,7 +93,8 @@ export default function Home() {
                   onChange={handlePasswordChange}
                 />
               </div>
-              <button className="btn btn-accent">Login</button>
+
+              <ButtonAccent loading={loginLoading}>Login</ButtonAccent>
 
               <div className="flex flex-col gap-2 pt-4">
                 <span className="label-text-alt">
@@ -117,6 +108,7 @@ export default function Home() {
           </div>
         </main>
       )}
+      {toast && <Toast toast={toast} setToast={setToast} />}
     </>
   );
 }

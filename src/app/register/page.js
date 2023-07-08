@@ -1,5 +1,7 @@
 "use client";
 
+import ButtonAccent from "@/components/ButtonAccent";
+import Toast from "@/components/Toast";
 import axios from "axios";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -7,14 +9,13 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [render, setRender] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [age, setAge] = useState(0);
   const [password, setPassword] = useState("");
   const [retypePassword, setRetypePassword] = useState("");
-
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -44,10 +45,18 @@ export default function Home() {
     setRetypePassword(e.target.value);
   };
 
+  const resetAllFields = () => {
+    setFullName("");
+    setUsername("");
+    setAge(0);
+    setPassword("");
+    setRetypePassword("");
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+
+    setRegisterLoading(true);
 
     const data = {
       fullName,
@@ -60,21 +69,23 @@ export default function Home() {
     if (validateData(data)) {
       try {
         const res = await axios.post("/api/users", data);
-        console.log("res", res);
 
-        setSuccess(res.data.message);
-
-        setUsername("");
-        setAge(0);
-        setPassword("");
-        setRetypePassword("");
+        setToast({ type: "success", message: res.data.message });
+        resetAllFields();
       } catch (error) {
-        setError(error.response.data.message);
+        setToast({ type: "error", message: error.response.data.message });
       }
     }
+    setRegisterLoading(false);
   }
 
-  const validateData = ({ username, age, password, retypePassword }) => {
+  const validateData = ({
+    fullName,
+    username,
+    age,
+    password,
+    retypePassword,
+  }) => {
     if (
       fullName === "" ||
       username === "" ||
@@ -82,22 +93,22 @@ export default function Home() {
       password === "" ||
       retypePassword === ""
     ) {
-      setError("Please fill all the fields");
+      setToast({ type: "error", message: "Please fill all the fields" });
       return false;
     }
 
     if (username.length < 3) {
-      setError("Username must be at least 3 characters long");
+      setToast({ type: "error", message: "Username must be at least 3 chars" });
       return false;
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setError("Username can only contain letters, numbers, and underscores");
+      setToast({ type: "error", message: "Username must be alphanumeric" });
       return false;
     }
 
     if (password !== retypePassword) {
-      setError("Passwords do not match");
+      setToast({ type: "error", message: "Passwords do not match" });
       return false;
     }
     return true;
@@ -113,42 +124,6 @@ export default function Home() {
               className="mx-auto form-control max-w-md gap-4"
               onSubmit={handleSubmit}
             >
-              {error && (
-                <div className="alert alert-error">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>{error}</span>
-                </div>
-              )}
-              {success && (
-                <div className="alert alert-success">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span>Successfully registered!</span>
-                </div>
-              )}
               <div>
                 <label className="label">
                   <span className="label-text">Full Name</span>
@@ -211,9 +186,8 @@ export default function Home() {
                   onChange={handleRetypePasswordChange}
                 />
               </div>
-              <button className="btn btn-accent" type="submit">
-                Register
-              </button>
+
+              <ButtonAccent loading={registerLoading}>Register</ButtonAccent>
 
               <div className="flex flex-col gap-2 pt-4">
                 <span className="label-text-alt">already have an account?</span>
@@ -225,6 +199,8 @@ export default function Home() {
           </div>
         </main>
       )}
+
+      {toast && <Toast toast={toast} setToast={setToast} />}
     </>
   );
 }
