@@ -2,7 +2,7 @@ import { AiOutlineClose } from "react-icons/ai";
 
 export default function Toast({ toast, setToast }) {
   return (
-    <div className="toast toast-end z-[99]">
+    <div className="toast toast-end z-[9999]">
       <div className={`alert ${
         toast.type === "success" ? "alert-success" : 
         toast.type === "error" ? "alert-error" :
