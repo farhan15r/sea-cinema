@@ -3,24 +3,27 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import UsersService from "@/lib/service/mongo/UsersService";
 import TokenManager from "@/lib/tokenize/TokenManager";
+import AuthValidator from "@/lib/validator/auth";
 
 export async function POST(request) {
-  const req = await request.json();
-  const { username, password } = req;
+  const payload = await request.json();
+  const { username, password } = payload;
 
-  const userService = new UsersService();
+  const usersService = new UsersService();
+  const authValidator = new AuthValidator
 
   try {
-    const user = await userService.getUser(username);
-    await userService.validateCredentials(password, user.password);
+    authValidator.validatePostAuth(payload);
+    const user = await usersService.getUser(username);
+    await usersService.validateCredentials(password, user.password);
 
-    const payload = {
+    const tokenPayload = {
       username: user.username,
       age: user.age,
     };
 
-    const accessToken = TokenManager.generateAccessToken(payload);
-    const refreshToken = TokenManager.generateRefreshToken(payload);
+    const accessToken = TokenManager.generateAccessToken(tokenPayload);
+    const refreshToken = TokenManager.generateRefreshToken(tokenPayload);
 
     return NextResponse.json(
       {

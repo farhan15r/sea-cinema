@@ -1,65 +1,116 @@
-import database from "@/db/mongo";
+import database, { client } from "@/db/mongo";
 import ClientError from "@/lib/exceptions/ClientError";
 import NotFoundError from "@/lib/exceptions/NotFoundError";
+import ServerError from "@/lib/exceptions/ServerError";
 import { ObjectId } from "mongodb";
 
 export default class BookingsService {
   constructor() {
+    this.transactionOptions = {
+      readConcern: { level: "majority" },
+      writeConcern: { w: "majority" },
+      readPreference: "primary",
+    };
+
     this.userCollection = database.collection("users");
     this.bookingCollection = database.collection("bookings");
     this.movieCollection = database.collection("movies");
     this.showTimesCollection = database.collection("showTimes");
   }
 
-  async bookTicket({
-    currBalance,
-    totalCost,
-    username,
-    movieId,
-    movieTitle,
-    expDate,
-    seats,
-    showTimeId,
-    ageRating,
-    userAge,
-  }) {
-    if (userAge < ageRating) {
-      throw new ClientError("You are not old enough to watch this movie");
-    }
+  async bookingTicket({ username, movieId, date, time, seats }) {
+    const session = client.startSession(this.transactionOptions);
+    try {
+      session.startTransaction();
 
-    if (currBalance < totalCost) {
-      throw new ClientError("Insufficient balance");
-    }
+      const user = await this.userCollection.findOne({ username });
+      const movie = await this.movieCollection.findOne({
+        _id: new ObjectId(movieId),
+      });
+      const showTime = await this.showTimesCollection.findOne({
+        movieId,
+        date,
+        time,
+      });
+      const description = `${movie.title} | ${date}-${time} | [${seats}]`;
+      const totalCost = movie.ticket_price * seats.length;
 
-    const data = {
-      username,
-      movieId,
-      movieTitle,
-      seats,
-      totalCost,
-      expDate,
-      showTimeId,
-    };
+      if (movie.age_rating > user.age) {
+        throw new ClientError("You are not old enough to watch this movie");
+      }
 
-    const booking = await this.bookingCollection.insertOne(data);
+      if (user.balance < totalCost) {
+        throw new ClientError("Insufficient balance");
+      }
 
-    if (!booking) {
-      throw new ClientError("Failed to book ticket");
+      await this.bookingCollection.insertOne(
+        {
+          username,
+          movieId,
+          movieTitle: movie.title,
+          seats,
+          totalCost,
+          expDate: showTime.expDate,
+          showTimeId: showTime._id.toString(),
+        },
+        { session }
+      );
+
+      await this.userCollection.updateOne(
+        { username },
+        {
+          $inc: { balance: -totalCost },
+          $push: {
+            histories: {
+              type: "out",
+              amount: totalCost,
+              description,
+              date: new Date(),
+            },
+          },
+        },
+        { session }
+      );
+
+      const newSeats = showTime.seats.map((seat) => {
+        if (seats.includes(seat.number)) {
+          return {
+            number: seat.number,
+            isBooked: true,
+          };
+        } else return seat;
+      });
+
+      await this.showTimesCollection.updateOne(
+        { _id: showTime._id },
+        { $set: { seats: newSeats } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      await session.endSession();
+    } catch (error) {
+      await session.abortTransaction();
+      await session.endSession();
+
+      if (error instanceof ClientError) {
+        throw error;
+      }
+
+      throw new ServerError("Failed to book ticket");
     }
   }
 
   async getBookingTickets(username) {
     const currDate = new Date();
 
-    const bookingTickets = await this.bookingCollection.find({
-      username,
-      expDate: { $gte: currDate },
-      $or: [
-        { isWithdrawn: false },
-        { isWithdrawn: { $exists: false } }
-      ],
-    },
-    ).toArray();
+    const bookingTickets = await this.bookingCollection
+      .find({
+        username,
+        expDate: { $gte: currDate },
+        $or: [{ isWithdrawn: false }, { isWithdrawn: { $exists: false } }],
+      })
+      .toArray();
 
     return bookingTickets;
   }
@@ -76,16 +127,67 @@ export default class BookingsService {
     return booking;
   }
 
-  async withdrawBooking(bookingId) {
-    const result = await this.bookingCollection.updateOne(
-      { _id: new ObjectId(bookingId) },
-      { $set: { isWithdrawn: true } }
-    )
+  async withdrawBooking(bookingId, username) {
+    const session = client.startSession(this.transactionOptions);
+    try {
+      session.startTransaction();
 
-    if (!result.acknowledged) {
-      throw new ClientError("Failed to withdraw booking");
+      const booking = await this.bookingCollection.findOne({
+        _id: new ObjectId(bookingId),
+      });
+
+      const showTime = await this.showTimesCollection.findOne({
+        _id: new ObjectId(booking.showTimeId),
+      });
+      const description = `${booking.movieTitle} | ${booking.expDate} | [${booking.seats}]`;
+
+      const newSeats = showTime.seats.map((seat) => {
+        if (booking.seats.includes(seat.number))
+          return {
+            number: seat.number,
+            isBooked: false,
+          };
+        else return seat;
+      });
+
+      await this.bookingCollection.updateOne(
+        { _id: new ObjectId(bookingId) },
+        { $set: { isWithdrawn: true } },
+        { session }
+      );
+
+      await this.showTimesCollection.updateOne(
+        { _id: new ObjectId(booking.showTimeId) },
+        { $set: { seats: newSeats } },
+        { session }
+      );
+
+      await this.userCollection.updateOne(
+        { username },
+        {
+          $inc: { balance: +booking.totalCost },
+          $push: {
+            histories: {
+              type: "in",
+              amount: booking.totalCost,
+              description,
+              date: new Date(),
+            },
+          },
+        },
+        { session }
+      );
+
+      await session.commitTransaction();
+      await session.endSession();
+    } catch (error) {
+      await session.abortTransaction();
+      await session.endSession();
+
+      if (error instanceof ClientError) {
+        throw error;
+      }
+      throw new ServerError("Failed to withdraw booking");
     }
-
-    return;
   }
 }

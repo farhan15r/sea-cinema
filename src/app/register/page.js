@@ -66,53 +66,17 @@ export default function Home() {
       retypePassword,
     };
 
-    if (validateData(data)) {
-      try {
-        const res = await axios.post("/api/users", data);
+    try {
+      const res = await axios.post("/api/users", data);
 
-        setToast({ type: "success", message: res.data.message });
-        resetAllFields();
-      } catch (error) {
-        setToast({ type: "error", message: error.response.data.message });
-      }
+      setToast({ type: "success", message: res.data.message });
+      resetAllFields();
+    } catch (error) {
+      setToast({ type: "error", message: error.response.data.message });
     }
+
     setRegisterLoading(false);
   }
-
-  const validateData = ({
-    fullName,
-    username,
-    age,
-    password,
-    retypePassword,
-  }) => {
-    if (
-      fullName === "" ||
-      username === "" ||
-      age === 0 ||
-      password === "" ||
-      retypePassword === ""
-    ) {
-      setToast({ type: "error", message: "Please fill all the fields" });
-      return false;
-    }
-
-    if (username.length < 3) {
-      setToast({ type: "error", message: "Username must be at least 3 chars" });
-      return false;
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setToast({ type: "error", message: "Username must be alphanumeric" });
-      return false;
-    }
-
-    if (password !== retypePassword) {
-      setToast({ type: "error", message: "Passwords do not match" });
-      return false;
-    }
-    return true;
-  };
 
   return (
     <>
@@ -156,7 +120,6 @@ export default function Home() {
                 <input
                   type="number"
                   placeholder="Type here"
-                  min={1}
                   className="input input-bordered input-accent w-full"
                   value={age}
                   onChange={handleAgeChange}

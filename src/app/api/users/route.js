@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import UsersService from "@/lib/service/mongo/UsersService";
+import UsersValidator from "@/lib/validator/users";
 
 export async function POST(request) {
-  const req = await request.json();
-  const { fullName, username, age, password } = req;
+  const payload = await request.json();
+  const { fullName, username, age, password } = payload;
 
   const usersService = new UsersService();
+  const usersValidator = new UsersValidator();
 
   try {
+    usersValidator.validatePostUser(payload);
     await usersService.checkUsernameAvailable(username);
     await usersService.addUser({ fullName, username, age, password });
 

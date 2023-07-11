@@ -1,7 +1,4 @@
 import BookingsService from "@/lib/service/mongo/BookingsService";
-import MoviesService from "@/lib/service/mongo/MoviesService";
-import ShowTimesService from "@/lib/service/mongo/ShowTimesService";
-import UsersService from "@/lib/service/mongo/UsersService";
 import TokenManager from "@/lib/tokenize/TokenManager";
 import { NextResponse } from "next/server";
 
@@ -11,47 +8,12 @@ export async function POST(request) {
   const { headers } = request;
 
   const token = TokenManager.getTokenFromHeaders(headers);
-  const { username, age } = TokenManager.verifyAccessToken(token);
-
-  const usersService = new UsersService();
-  const moviesService = new MoviesService();
+  
   const bookingsService = new BookingsService();
-  const showTimesService = new ShowTimesService();
-
+  
   try {
-    const currBalance = await usersService.getBalance(username);
-    const ticketPrice = await moviesService.getTicketsPrice(movieId);
-    const { title: movieTitle, age_rating: ageRating } =
-      await moviesService.getMovieById(movieId);
-    // const movieTitle = await moviesService.getMovieTitle(movieId);
-    const expDate = await showTimesService.getExpDate({ movieId, date, time });
-    const description = `${movieTitle} | ${date}-${time} | [${seats}]`;
-    const showTimeId = await showTimesService.getShowTimeId({
-      movieId,
-      date,
-      time,
-    });
-    const totalCost = ticketPrice * seats.length;
-    await bookingsService.bookTicket({
-      currBalance,
-      totalCost,
-      username,
-      movieId,
-      movieTitle,
-      expDate,
-      seats,
-      showTimeId,
-      ageRating,
-      userAge: age,
-    });
-    await usersService.updateBalanceBooking({
-      username,
-      currBalance,
-      totalCost,
-      description,
-      type: "out",
-    });
-    await showTimesService.updateSeats({ showTimeId, seats, isBooked: true });
+    const { username } = TokenManager.verifyAccessToken(token);
+    await bookingsService.bookingTicket({ username, movieId, date, time, seats });
 
     return NextResponse.json(
       { message: "success booking ticket" },
@@ -68,14 +30,12 @@ export async function POST(request) {
 
 export async function GET({headers}) {
   const token = TokenManager.getTokenFromHeaders(headers);
-  const { username, age } = TokenManager.verifyAccessToken(token);
-
+  
   const bookingsService = new BookingsService();
-
+  
   try {
+    const { username } = TokenManager.verifyAccessToken(token);
     const bookingTickets = await bookingsService.getBookingTickets(username);
-
-    console.log();
 
     return NextResponse.json(
        bookingTickets,

@@ -9,4 +9,5 @@ const dbName = process.env.MONGO_DB_NAME;
 
 const database = client.db(dbName);
 
+export { client };
 export default database;
