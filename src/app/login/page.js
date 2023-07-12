@@ -8,19 +8,25 @@ import tokenUtils from "../utils/tokenUtils";
 import ButtonAccent from "@/components/ButtonAccent";
 import Toast from "@/components/Toast";
 
-export default function Home() {
+export default function Home({ searchParams }) {
+  const { expired } = searchParams;
+
   const [loginLoading, setLoginLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [render, setRender] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState("");
-
   useEffect(() => {
     if (tokenUtils.isLogin()) redirect("/");
+    if (expired) {
+      setToast({
+        type: "error",
+        message: "Session expired, please login again",
+      });
+    }
     setRender(true);
-  }, []);
+  }, [expired]);
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);

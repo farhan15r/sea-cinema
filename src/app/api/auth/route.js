@@ -1,19 +1,18 @@
-import database from "@/db/mongo";
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import UsersService from "@/lib/service/mongo/UsersService";
 import TokenManager from "@/lib/tokenize/TokenManager";
 import AuthValidator from "@/lib/validator/auth";
 
 export async function POST(request) {
-  const payload = await request.json();
-  const { username, password } = payload;
-
-  const usersService = new UsersService();
-  const authValidator = new AuthValidator
-
   try {
+    const payload = await request.json();
+
+    const usersService = new UsersService();
+    const authValidator = new AuthValidator();
+
     authValidator.validatePostAuth(payload);
+    const { username, password } = payload;
+
     const user = await usersService.getUser(username);
     await usersService.validateCredentials(password, user.password);
 
@@ -34,19 +33,23 @@ export async function POST(request) {
     );
   } catch (error) {
     return NextResponse.json(
-      { message: error.message },
-      { status: error.status }
+      { message: error.message || "Something went wrong" },
+      { status: error.status || 500 }
     );
   }
 }
 
 export async function PUT(request) {
-  const req = await request.json();
-  const { refreshToken } = req;
-
   try {
-    const {username, age} = TokenManager.verifyRefreshToken(refreshToken);
-    const accessToken = TokenManager.generateAccessToken({username, age});
+    const payload = await request.json();
+
+    const authValidator = new AuthValidator();
+    authValidator.validatePutAuth(payload);
+
+    const { refreshToken } = payload;
+
+    const { username, age } = TokenManager.verifyRefreshToken(refreshToken);
+    const accessToken = TokenManager.generateAccessToken({ username, age });
 
     return NextResponse.json(
       {
@@ -56,8 +59,8 @@ export async function PUT(request) {
     );
   } catch (error) {
     return NextResponse.json(
-      { message: error.message },
-      { status: error.status }
+      { message: error.message || "Something went wrong" },
+      { status: error.status || 500 }
     );
   }
 }

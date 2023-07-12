@@ -67,7 +67,10 @@ function BalanceModal({ isOpen, onClose, onHistoryClick }) {
         <div className="modal-box" onClick={(e) => e.stopPropagation()}>
           <h3 className="font-bold text-lg">Balance</h3>
           <p className="py-4">
-            Your balance is <span className="font-bold">Rp{currentBalance.toLocaleString('id-ID')}</span>
+            Your balance is{" "}
+            <span className="font-bold">
+              Rp{currentBalance.toLocaleString("id-ID")}
+            </span>
           </p>
 
           {balanceLoading ? (

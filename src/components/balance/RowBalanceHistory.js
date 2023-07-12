@@ -17,7 +17,7 @@ export default function RowBalanceHistory({ history }) {
     <tr>
       <td className="flex flex-col">
         <div className="flex flex-row justify-between items-center">
-        <p className={`${typeClass} md:text-lg`}>{amountStr}</p>
+          <p className={`${typeClass} md:text-lg`}>{amountStr}</p>
 
           <div className="flex">
             <span className="badge badge-ghost badge-sm">

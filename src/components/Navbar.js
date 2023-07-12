@@ -83,8 +83,9 @@ export default function Navbar() {
                     </a>
                   </li>
                   <li>
-                    <a onClick={logoutAction}>Logout
-                    <span className="badge">
+                    <a onClick={logoutAction}>
+                      Logout
+                      <span className="badge">
                         <BsBoxArrowRight />
                       </span>
                     </a>
@@ -107,14 +108,12 @@ export default function Navbar() {
                   onClose={() => setIsHistoryModalOpen(false)}
                 />
               )}
-              {
-                isTicketModalOpen && (
-                  <MyTicketModal
-                    isOpen={isTicketModalOpen}
-                    onClose={() => setIsTicketModalOpen(false)}
-                  />
-                )
-              }
+              {isTicketModalOpen && (
+                <MyTicketModal
+                  isOpen={isTicketModalOpen}
+                  onClose={() => setIsTicketModalOpen(false)}
+                />
+              )}
             </>
           ) : (
             <Link href={"/login"} className="btn btn-ghost">

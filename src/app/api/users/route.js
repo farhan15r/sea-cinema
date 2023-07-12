@@ -14,10 +14,14 @@ export async function POST(request) {
     await usersService.checkUsernameAvailable(username);
     await usersService.addUser({ fullName, username, age, password });
 
-    return NextResponse.json({ message: "Register successfully" }, { status: 201 });
+    return NextResponse.json(
+      { message: "Register successfully" },
+      { status: 201 }
+    );
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: error.status  });
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" },
+      { status: error.status || 500 }
+    );
   }
-
 }
-  

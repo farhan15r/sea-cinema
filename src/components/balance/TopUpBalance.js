@@ -26,8 +26,7 @@ export default function TopUpBalance({ updateBalance, updateBalanceLoading }) {
             <input
               id="topup-amount"
               type="number"
-              defaultValue="10000"
-              min={10000}
+              defaultValue="0"
               className="input input-bordered"
             />
           </div>

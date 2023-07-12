@@ -32,6 +32,11 @@ const tokenUtils = {
     return decode.username;
   },
 
+  removeTokens: () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  },
+
   isAccessTokenExpired: () => {
     const accessToken = tokenUtils.getAccessToken();
     const decoded = jwtDecode(accessToken);
@@ -43,7 +48,7 @@ const tokenUtils = {
     }
 
     return false;
-  }
+  },
 };
 
 export default tokenUtils;

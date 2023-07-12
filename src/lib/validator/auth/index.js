@@ -7,12 +7,22 @@ export default class AuthValidator {
   }
 
   validatePostAuth(payload) {
-    const { PostAuthSchema} = this.schema;
+    const { PostAuthSchema } = this.schema;
 
     const validationResult = PostAuthSchema.validate(payload);
 
-    if (validationResult.error){
-      throw new InvariantError(validationResult.error.message)
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  }
+
+  validatePutAuth(payload) {
+    const { PutAuthSchema } = this.schema;
+
+    const validationResult = PutAuthSchema.validate(payload);
+
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
     }
   }
 }

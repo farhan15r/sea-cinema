@@ -1,4 +1,4 @@
-const movies =  [
+const movies = [
   {
     title: "Fast X",
     description:

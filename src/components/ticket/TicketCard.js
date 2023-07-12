@@ -1,7 +1,6 @@
 import axiosJWT from "@/app/utils/axiosJWT";
 import ButtonError from "../ButtonError";
 import { useState } from "react";
-import Toast from "../Toast";
 
 export default function TicketCard({ ticket, fetchData, setToast }) {
   const [ticketLoading, setTicketLoading] = useState(false);

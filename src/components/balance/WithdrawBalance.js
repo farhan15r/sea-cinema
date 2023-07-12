@@ -1,6 +1,9 @@
 import ButtonAccent from "@/components/ButtonAccent";
 
-export default function WithdrawBalance({ updateBalance, currentBalance, updateBalanceLoading }) {
+export default function WithdrawBalance({
+  updateBalance,
+  updateBalanceLoading,
+}) {
   const withdrawAction = async (e) => {
     e.preventDefault();
     const withdrawAmount = parseInt(
@@ -28,9 +31,7 @@ export default function WithdrawBalance({ updateBalance, currentBalance, updateB
             <input
               id="withdraw-amount"
               type="number"
-              defaultValue="10000"
-              min={10000}
-              max={currentBalance < 500000 ? currentBalance : 500000}
+              defaultValue="0"
               className="input input-bordered"
             />
           </div>

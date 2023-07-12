@@ -17,7 +17,7 @@ export default class UsersService {
     return;
   }
 
-  async addUser({fullName, username, age, password }) {
+  async addUser({ fullName, username, age, password }) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.userCollection.insertOne({
@@ -63,6 +63,8 @@ export default class UsersService {
     const newBalance =
       type === "topup" ? currentBalance + amount : currentBalance - amount;
 
+    if (newBalance < 0) throw new ClientError("Balance is not enough");
+
     const history = {
       type: type === "topup" ? "in" : "out",
       amount,
@@ -96,30 +98,5 @@ export default class UsersService {
       ])
       .toArray();
     return sortedHistories[0].histories; // Mengembalikan array histories
-  }
-
-  async updateBalanceBooking({
-    username,
-    currBalance,
-    totalCost,
-    description,
-    type,
-  }) {
-    const newBalance = currBalance - totalCost;
-
-    const history = {
-      type,
-      amount: totalCost,
-      description,
-      date: new Date(),
-    };
-
-    const result = await this.userCollection.updateOne(
-      { username, balance: currBalance },
-      {
-        $set: { balance: newBalance },
-        $push: { histories: history },
-      }
-    );
   }
 }

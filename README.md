@@ -26,9 +26,7 @@ And already deployed on [Vercel](https://vercel.com/) - https://sea-cinema-phi.v
 
 ## Disclaimer
 
-- Be patient
-- This app may be slow when fetching data
-- Few components don't have loading animation when fetching data
+- Not all movies have show time
 
 # Develop this app
 

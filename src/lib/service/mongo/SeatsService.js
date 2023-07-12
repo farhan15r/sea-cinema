@@ -1,7 +1,4 @@
 import database from "@/db/mongo";
-import bcrypt from "bcrypt";
-import ClientError from "@/lib/exceptions/ClientError";
-import ServerError from "@/lib/exceptions/ServerError";
 import NotFoundError from "@/lib/exceptions/NotFoundError";
 
 export default class SeatsService {
@@ -10,7 +7,11 @@ export default class SeatsService {
   }
 
   async getSeats({ movieId, date, time }) {
-    const {seats} = await this.showTimesCollection.findOne({ movieId, date, time });
+    const { seats } = await this.showTimesCollection.findOne({
+      movieId,
+      date,
+      time,
+    });
 
     if (!seats) {
       throw new NotFoundError("Seats not found");

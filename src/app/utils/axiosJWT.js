@@ -6,10 +6,15 @@ const axiosJWT = axios.create();
 axiosJWT.interceptors.request.use(
   async (config) => {
     if (tokenUtils.isAccessTokenExpired()) {
-      const { data } = await axios.put("/api/auth", {
-        refreshToken: tokenUtils.getRefreshToken(),
-      });
-      tokenUtils.setAccessToken(data.accessToken);
+      try {
+        const { data } = await axios.put("/api/auth", {
+          refreshToken: tokenUtils.getRefreshToken(),
+        });
+        tokenUtils.setAccessToken(data.accessToken);
+      } catch (error) {
+        tokenUtils.removeTokens();
+        window.location = "/login?expired=true";
+      }
     }
 
     config.headers["Authorization"] = `Bearer ${tokenUtils.getAccessToken()}`;
@@ -17,6 +22,5 @@ axiosJWT.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 
 export default axiosJWT;
