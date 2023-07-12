@@ -35,7 +35,7 @@ export default function BookingTicket({ movie }) {
     if (selectedTime) {
       fetchSeatsData();
     }
-  }, [selectedTime]);
+  }, [selectedTime, selectedDate]);
 
   const fetchDatesData = async () => {
     try {
