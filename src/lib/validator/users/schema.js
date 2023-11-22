@@ -8,4 +8,5 @@ export const PostUsersSchema = Joi.object({
     .label("Username"),
   age: Joi.number().required().min(1).label("Age"),
   password: Joi.string().required().label("Password"),
+  retypePassword: Joi.string().required().label("Validate Password"),
 });
